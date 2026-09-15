@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>VR BLAZERS - AI-Powered Pediatric Vision Screening & Therapy Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="vr-mode-inactive">
+
+  <!-- Ambient VR Background Orbs -->
+  <div class="vr-ambient-bg">
+    <div class="glow-orb orb-1"></div>
+    <div class="glow-orb orb-2"></div>
+    <div class="glow-orb orb-3"></div>
+  </div>
+
+  <!-- Top Global Bar -->
+  <header class="top-nav glass-panel">
+    <div class="brand-area">
+      <div class="brand-logo-icon">
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M2 10a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v4a6 6 0 0 1-6 6H8a6 6 0 0 1-6-6v-4z"></path>
+          <line x1="6" y1="12" x2="10" y2="12"></line>
+          <line x1="14" y1="12" x2="18" y2="12"></line>
+        </svg>
+      </div>
+      <div>
+        <h1 class="brand-title">VR BLAZERS <span class="brand-badge">CLINICAL AI</span></h1>
+        <p class="brand-subtitle">Pediatric Vision Screening & Dichoptic Therapy</p>
+      </div>
+    </div>
+
+    <!-- Quick Actions & Status -->
+    <div class="top-nav-actions">
+      <!-- Fast-Track Hackathon Judge Demo Controls -->
+      <div class="judge-demo-pill">
+        <span class="demo-tag">HACKATHON DEMO:</span>
+        <button class="btn-demo-preset" onclick="loadJudgePreset('amblyopia')" title="Instantly load child profile with Amblyopia Risk">
+          🚨 Amblyopia Risk Demo
+        </button>
+        <button class="btn-demo-preset preset-healthy" onclick="loadJudgePreset('healthy')" title="Instantly load Healthy 20/20 profile">
+          ✅ Healthy 20/20 Demo
+        </button>
+      </div>
+
+      <!-- Working Stereoscopic VR Mode Button -->
+      <button id="vr-toggle-btn" class="btn-icon-pill btn-vr-launch" onclick="toggleVRMode()" title="Toggle Stereoscopic 3D Side-by-Side VR Mode for Headsets & Mobile Goggles">
+        <span class="vr-goggles-icon">🥽</span>
+        <span id="vr-btn-text">Enter VR Mode</span>
+      </button>
+
+      <!-- Direct 3D VR Clinic Room Navigation Button -->
+      <button id="vr-clinic-nav-btn" class="btn-icon-pill btn-vr-room" onclick="navigate('vr')" title="Launch 3D VR Clinic Room with Touch Controllers & Floating UI">
+        <span>🎮</span>
+        <span>3D VR Clinic</span>
+      </button>
+
+      <!-- AI Voice Narrator Toggle -->
+      <button id="voice-toggle-btn" class="btn-icon-pill" onclick="toggleAudioGuide()" title="Toggle Pediatric Voice Guide">
+        <span id="voice-icon">🔊</span>
+        <span id="voice-text">Voice: ON</span>
+      </button>
+
+      <!-- Headset Connection Badge -->
+      <div class="status-pill status-connected">
+        <span class="status-dot pulse"></span>
+        <span>VR Headset: CONNECTED</span>
+      </div>
+
+      <!-- User Profile Action -->
+      <button class="btn-logout" onclick="openLoginModal()" title="Switch Account">
+        <span>Dr. Dev Doc</span>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+          <polyline points="16 17 21 12 16 7"></polyline>
+          <line x1="21" y1="12" x2="9" y2="12"></line>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Application Stage -->
+  <div class="main-layout" id="main-app-layout">
+    
+    <!-- Left Patient Vitals Sidebar -->
+    <aside class="patient-sidebar glass-panel">
+      <div class="patient-card">
+        <div class="patient-avatar-box">
+          <div class="avatar-ring">
+            <span class="avatar-emoji">👦</span>
+          </div>
+          <button class="avatar-edit-btn" title="Edit Profile">✏️</button>
+        </div>
+        <div class="patient-name-box">
+          <h2 id="patient-name-display">Aarav Sharma</h2>
+          <span class="patient-id-badge" id="patient-id-display">ID: #CH-0472</span>
+        </div>
+
+        <!-- Vitals Grid -->
+        <div class="vitals-grid">
+          <div class="vital-item">
+            <span class="vital-label">Age</span>
+            <span class="vital-val" id="patient-age-display">7 yrs</span>
+          </div>
+          <div class="vital-item">
+            <span class="vital-label">Height</span>
+            <span class="vital-val">122 cm</span>
+          </div>
+          <div class="vital-item">
+            <span class="vital-label">Weight</span>
+            <span class="vital-val">24 kg</span>
+          </div>
+          <div class="vital-item">
+            <span class="vital-label">BMI</span>
+            <span class="vital-val text-success">16.1 (Normal)</span>
+          </div>
+          <div class="vital-item">
+            <span class="vital-label">BMR</span>
+            <span class="vital-val">980 kcal/d</span>
+          </div>
+          <div class="vital-item">
+            <span class="vital-label">Target Eye</span>
+            <span class="vital-val text-warning">OS (Left Eye)</span>
+          </div>
+        </div>
+
+        <!-- Doctor & Clinical Details -->
+        <div class="clinical-meta-box">
+          <div class="meta-line">
+            <span class="meta-k">Clinician:</span>
+            <span class="meta-v">Dev Doc Vision</span>
+          </div>
+          <div class="meta-line">
+            <span class="meta-k">Doctor Code:</span>
+            <span class="meta-v">2-2857</span>
+          </div>
+          <div class="meta-line">
+            <span class="meta-k">Center:</span>
+            <span class="meta-v">Apex Pediatric Clinic</span>
+          </div>
+          <div class="meta-line">
+            <span class="meta-k">Rx Status:</span>
+            <span class="meta-v text-success">Active Protocol</span>
+          </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <nav class="sidebar-nav">
+          <button class="nav-btn active" id="nav-home" onclick="navigate('home')">
+            <span class="nav-btn-icon">🏠</span>
+            <span>Core Overview</span>
+          </button>
+          <button class="nav-btn" id="nav-calibration" onclick="navigate('calibration')">
+            <span class="nav-btn-icon">🎯</span>
+            <span>Headset Calibration</span>
+          </button>
+          <button class="nav-btn" id="nav-clinical" onclick="navigate('clinical')">
+            <span class="nav-btn-icon">🔬</span>
+            <span>Clinical Screening (5 Tests)</span>
+          </button>
+          <button class="nav-btn" id="nav-report" onclick="navigate('report')">
+            <span class="nav-btn-icon">📋</span>
+            <span>AI Diagnostic Report</span>
+          </button>
+          <button class="nav-btn" id="nav-therapy" onclick="navigate('therapy')">
+            <span class="nav-btn-icon">🎮</span>
+            <span>Cloud Jumper Therapy</span>
+          </button>
+          <button class="nav-btn" id="nav-vr" onclick="navigate('vr')">
+            <span class="nav-btn-icon">🥽</span>
+            <span>3D VR Clinic & Controllers</span>
+          </button>
+        </nav>
+
+        <!-- Screening Summary Progress -->
+        <div class="session-progress-card">
+          <div class="progress-title-row">
+            <span>Session Battery</span>
+            <span id="session-progress-text">0 / 5 Done</span>
+          </div>
+          <div class="progress-bar-track">
+            <div id="session-progress-fill" class="progress-bar-fill" style="width: 0%;"></div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Center Interactive Workspace (Dynamic Viewport) -->
+    <main class="content-viewport" id="viewport-stage"></main>
+
+  </div>
+
+  <!-- Dedicated Stereoscopic 3D Split-Screen VR Viewport (For Quest / Mobile VR Goggles) -->
+  <div id="vr-split-viewport" class="vr-split-screen-container">
+    <div class="vr-eye vr-eye-left">
+      <div class="vr-lens-badge">LEFT EYE (OS)</div>
+      <div class="vr-eye-content" id="vr-left-content"></div>
+    </div>
+    <div class="vr-split-divider"></div>
+    <div class="vr-eye vr-eye-right">
+      <div class="vr-lens-badge">RIGHT EYE (OD)</div>
+      <div class="vr-eye-content" id="vr-right-content"></div>
+    </div>
+    <button class="btn-exit-vr" onclick="toggleVRMode()">✕ Exit VR Mode</button>
+  </div>
+
+  <!-- Real-time VR Touch Controllers & Laser Beams Overlay -->
+  <div id="vr-controllers-layer" class="vr-controllers-container">
+    <!-- Left Hand Controller -->
+    <div class="vr-controller-wrap left-controller" id="vr-ctrl-left">
+      <div class="controller-body">
+        <div class="tracking-ring"></div>
+        <div class="faceplate">
+          <div class="analog-thumbstick" id="stick-left"></div>
+          <div class="controller-btn btn-x">X</div>
+          <div class="controller-btn btn-y">Y</div>
+        </div>
+        <div class="grip-handle"></div>
+      </div>
+      <!-- Emitted Blue Pointer Beam -->
+      <div class="laser-beam-line" id="laser-left"></div>
+      <div class="laser-reticle-dot" id="reticle-left"></div>
+    </div>
+
+    <!-- Right Hand Controller -->
+    <div class="vr-controller-wrap right-controller" id="vr-ctrl-right">
+      <div class="controller-body">
+        <div class="tracking-ring"></div>
+        <div class="faceplate">
+          <div class="analog-thumbstick" id="stick-right"></div>
+          <div class="controller-btn btn-a">A</div>
+          <div class="controller-btn btn-b">B</div>
+        </div>
+        <div class="grip-handle"></div>
+      </div>
+      <!-- Emitted Blue Pointer Beam -->
+      <div class="laser-beam-line" id="laser-right"></div>
+      <div class="laser-reticle-dot" id="reticle-right"></div>
+    </div>
+  </div>
+
+  <!-- Amblyopia Therapy Setup Modal (Matches Amblyopia Main Menu.png) -->
+  <div id="amblyopia-menu-modal" class="modal-backdrop">
+    <div class="amblyopia-setup-card glass-panel">
+      <div class="menu-top-row">
+        <button class="btn-back-circle" onclick="closeAmblyopiaModal()">←</button>
+        <span class="company-logo-text">VR BLAZERS</span>
+        <div style="width:28px;"></div>
+      </div>
+
+      <div class="game-capsule-badge">Bird</div>
+
+      <div class="patient-rx-row">
+        <span>Patient Code: <strong>TT-1</strong></span>
+        <span>👁️ Amblyopic Eye: <strong>Right</strong></span>
+      </div>
+
+      <!-- Eye Mode Selector -->
+      <div class="setup-option-group">
+        <label>Eye Mode</label>
+        <div class="pill-options-row">
+          <button class="pill-opt-btn" onclick="selectSetupOption('eyeMode', 'monocular', this)">Monocular</button>
+          <button class="pill-opt-btn active" onclick="selectSetupOption('eyeMode', 'dichoptic', this)">✓ Dichoptic</button>
+          <button class="pill-opt-btn" onclick="selectSetupOption('eyeMode', 'both', this)">Both</button>
+        </div>
+      </div>
+
+      <!-- Practice Eye Selector -->
+      <div class="setup-option-group">
+        <label>Practice Eye</label>
+        <div class="pill-options-row">
+          <button class="pill-opt-btn" onclick="selectSetupOption('practiceEye', 'left', this)">Left</button>
+          <button class="pill-opt-btn active" onclick="selectSetupOption('practiceEye', 'right', this)">✓ Right</button>
+        </div>
+      </div>
+
+      <!-- Eye Level Selector -->
+      <div class="setup-option-group">
+        <label>Eye Level</label>
+        <div class="pill-options-row">
+          <button class="pill-opt-btn active" onclick="selectSetupOption('eyeLevel', 'manual', this)">✓ Manual</button>
+          <button class="pill-opt-btn" onclick="selectSetupOption('eyeLevel', 'automatic', this)">Automatic</button>
+        </div>
+      </div>
+
+      <!-- Difficulty Selector -->
+      <div class="setup-option-group">
+        <label>Difficulty</label>
+        <div class="pill-options-row">
+          <button class="pill-opt-btn active" onclick="selectSetupOption('difficulty', 'easy', this)">✓ Easy</button>
+          <button class="pill-opt-btn" onclick="selectSetupOption('difficulty', 'medium', this)">Medium</button>
+          <button class="pill-opt-btn" onclick="selectSetupOption('difficulty', 'hard', this)">Hard</button>
+        </div>
+      </div>
+
+      <button class="btn-coral-next w-full" onclick="startConfiguredTherapyGame()">Next →</button>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <!-- Game Screenshot Preview & Download Modal -->
+  <div id="screenshot-modal" class="modal-backdrop">
+    <div class="screenshot-modal-card glass-panel">
+      <div class="screenshot-modal-header">
+        <div style="display:flex; align-items:center; gap:10px;">
+          <span style="font-size:1.4rem;">📸</span>
+          <h3 style="font-weight:800; font-size:1.15rem; color:#0f172a; margin:0;">Therapy Flight Screenshot</h3>
+        </div>
+        <button class="btn-close-modal" onclick="closeScreenshotModal()">✕</button>
+      </div>
+      <div class="screenshot-preview-box">
+        <img id="screenshot-img-preview" src="" alt="Therapy Screenshot" />
+      </div>
+      <div class="screenshot-meta-row">
+        <span>Patient: <strong>Aarav Sharma (#CH-0472)</strong></span>
+        <span>Rx: <strong id="screenshot-mode-tag">Dichoptic (Right Eye)</strong></span>
+        <span>Score: <strong id="screenshot-score-tag">0</strong></span>
+      </div>
+      <div class="screenshot-actions">
+        <a id="screenshot-download-link" class="btn-action-primary" download="Cloud_Jumper_Therapy_Capture.png">
+          📥 Download Screenshot (PNG)
+        </a>
+        <button class="btn-action-secondary" onclick="closeScreenshotModal()">Resume Flight</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="modal-backdrop">
+    <div class="modal-card glass-panel">
+      <button class="modal-close-btn" onclick="closeLoginModal()">✕</button>
+      <div class="login-header">
+        <div class="login-badge-icon">👁️</div>
+        <h2>Clinical Portal Login</h2>
+        <p class="login-subtitle">Sign in to your clinician or school screening terminal</p>
+      </div>
+
+      <form id="login-form" onsubmit="handleLogin(event)">
+        <div class="input-group">
+          <label>Clinician Email Address</label>
+          <div class="input-wrapper">
+            <span class="input-icon">✉️</span>
+            <input type="email" id="login-email" value="vision@gmail.com" required />
+          </div>
+        </div>
+
+        <div class="input-group">
+          <label>Password</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input type="password" id="login-password" value="demo1234" required />
+            <button type="button" class="btn-toggle-eye" onclick="togglePasswordVisibility()">👁️</button>
+          </div>
+        </div>
+
+        <div class="login-options-row">
+          <label class="remember-me"><input type="checkbox" checked /><span>Remember terminal</span></label>
+          <a href="#" class="link-forgot" onclick="alert('Demo Mode: Credentials pre-filled!'); return false;">Forgot password?</a>
+        </div>
+
+        <button type="submit" class="btn-action-primary w-full">
+          <span>Submit & Launch Terminal</span><span class="btn-arrow">→</span>
+        </button>
+        <div class="login-divider"><span>OR</span></div>
+        <button type="button" class="btn-action-secondary w-full" onclick="closeLoginModal(); speak('Welcome Doctor. Starting your screening terminal.')">
+          📱 Login with Mobile OTP / QR
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Master JavaScript Application -->
+  <script src="app.js"></script>
+</body>
+</html>

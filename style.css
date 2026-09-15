@@ -1,0 +1,1895 @@
+/* ==========================================================================
+   VR BLAZERS: 3D Virtual Clinic, Realistic VR Touch Controllers & Therapy HUD
+   ========================================================================== */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --cyan-accent: #06b6d4;
+  --cyan-glow: rgba(6, 182, 212, 0.45);
+  --status-normal: #10b981;
+  --status-normal-bg: rgba(16, 185, 129, 0.15);
+  --status-monitor: #f59e0b;
+  --status-monitor-bg: rgba(245, 158, 11, 0.15);
+  --status-refer: #ef4444;
+  --status-refer-bg: rgba(239, 68, 68, 0.18);
+  --status-urgent: #991b1b;
+  --status-urgent-bg: rgba(153, 27, 27, 0.25);
+
+  --glass-card: rgba(255, 255, 255, 0.82);
+  --glass-border: rgba(255, 255, 255, 0.85);
+  --glass-shadow: 0 16px 36px -8px rgba(15, 23, 42, 0.08), 0 0 1px 1px rgba(255, 255, 255, 0.6);
+  --panel-blur: blur(20px);
+
+  --font-main: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'Space Grotesk', monospace;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+  --text-dim: #94a3b8;
+  --transition-fast: 0.18s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: var(--font-main);
+  background-color: #f8fafc;
+  color: var(--text-dark);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Ambient Horizon */
+.vr-ambient-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: -1;
+  overflow: hidden;
+  background: linear-gradient(145deg, #e0e7ff 0%, #f1f5f9 35%, #fed7aa20 70%, #dbeafe 100%);
+}
+
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(80px);
+  opacity: 0.65;
+  animation: floatOrb 18s ease-in-out infinite alternate;
+}
+
+.orb-1 { width: 550px; height: 550px; background: radial-gradient(circle, rgba(99, 102, 241, 0.35) 0%, rgba(99, 102, 241, 0) 70%); top: -120px; left: -80px; }
+.orb-2 { width: 650px; height: 650px; background: radial-gradient(circle, rgba(14, 165, 233, 0.28) 0%, rgba(14, 165, 233, 0) 70%); bottom: -150px; right: -100px; animation-duration: 22s; }
+.orb-3 { width: 400px; height: 400px; background: radial-gradient(circle, rgba(244, 114, 182, 0.22) 0%, rgba(244, 114, 182, 0) 70%); top: 40%; left: 45%; animation-duration: 15s; }
+
+@keyframes floatOrb {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(-30px, 50px) scale(0.95); }
+}
+
+.glass-panel {
+  background: var(--glass-card);
+  backdrop-filter: var(--panel-blur);
+  -webkit-backdrop-filter: var(--panel-blur);
+  border: 1px solid var(--glass-border);
+  border-radius: 24px;
+  box-shadow: var(--glass-shadow);
+}
+
+/* Header */
+.top-nav {
+  margin: 16px 20px 0;
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 16px;
+  z-index: 100;
+}
+
+.brand-area { display: flex; align-items: center; gap: 14px; }
+.brand-logo-icon {
+  width: 44px; height: 44px;
+  background: linear-gradient(135deg, #2563eb, #06b6d4);
+  color: #fff;
+  border-radius: 14px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+}
+.brand-title { font-size: 1.15rem; font-weight: 800; letter-spacing: -0.02em; display: flex; align-items: center; gap: 8px; }
+.brand-badge { font-size: 0.65rem; padding: 2px 8px; background: #2563eb; color: white; border-radius: 6px; letter-spacing: 0.08em; }
+.brand-subtitle { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; }
+
+.top-nav-actions { display: flex; align-items: center; gap: 12px; }
+.judge-demo-pill {
+  display: flex; align-items: center;
+  background: rgba(239, 246, 255, 0.9);
+  border: 1px solid rgba(191, 219, 254, 0.8);
+  border-radius: 999px;
+  padding: 4px 6px 4px 12px;
+  gap: 8px;
+}
+.demo-tag { font-size: 0.68rem; font-weight: 700; color: #1d4ed8; }
+.btn-demo-preset {
+  background: #ef4444; color: white; border: none; font-size: 0.75rem; font-weight: 700;
+  padding: 6px 12px; border-radius: 999px; cursor: pointer; transition: var(--transition-fast);
+}
+.btn-demo-preset:hover { background: #dc2626; transform: scale(1.03); }
+.btn-demo-preset.preset-healthy { background: #10b981; }
+.btn-demo-preset.preset-healthy:hover { background: #059669; }
+
+/* Working VR Mode Launch Button */
+.btn-vr-launch {
+  background: linear-gradient(135deg, #0284c7, #2563eb) !important;
+  color: white !important;
+  box-shadow: 0 4px 14px var(--cyan-glow);
+  border: 1px solid rgba(255, 255, 255, 0.4) !important;
+}
+.btn-vr-launch:hover {
+  transform: scale(1.04);
+  box-shadow: 0 6px 20px var(--cyan-glow);
+}
+.vr-goggles-icon { font-size: 1.15rem; }
+
+.btn-icon-pill {
+  display: flex; align-items: center; gap: 6px;
+  background: rgba(255, 255, 255, 0.9);
+  border: 1px solid var(--glass-border);
+  padding: 8px 14px; border-radius: 999px; font-size: 0.82rem; font-weight: 600; cursor: pointer;
+  transition: var(--transition-fast);
+}
+.status-pill { display: flex; align-items: center; gap: 8px; padding: 8px 14px; border-radius: 999px; font-size: 0.8rem; font-weight: 700; }
+.status-connected { background: rgba(16, 185, 129, 0.12); color: #065f46; border: 1px solid rgba(16, 185, 129, 0.3); }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; background: #10b981; }
+.pulse { animation: pulseDot 2s infinite; }
+@keyframes pulseDot {
+  0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+  100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.btn-logout {
+  display: flex; align-items: center; gap: 6px; background: transparent;
+  border: 1px solid var(--glass-border); padding: 8px 12px; border-radius: 12px;
+  font-size: 0.82rem; font-weight: 600; color: var(--text-muted); cursor: pointer;
+}
+
+/* Layout */
+.main-layout {
+  display: flex;
+  gap: 20px;
+  padding: 20px;
+  max-width: 1720px;
+  margin: 0 auto;
+  height: calc(100vh - 100px);
+  position: relative;
+}
+
+.patient-sidebar {
+  width: 320px; flex-shrink: 0; display: flex; flex-direction: column; padding: 24px; overflow-y: auto;
+}
+.patient-card { display: flex; flex-direction: column; gap: 18px; }
+.patient-avatar-box { position: relative; align-self: center; }
+.avatar-ring {
+  width: 80px; height: 80px; border-radius: 50%;
+  background: linear-gradient(135deg, #fbcfe8, #fed7aa, #bfdbfe);
+  border: 3px solid white; display: flex; align-items: center; justify-content: center;
+}
+.avatar-emoji { font-size: 2.5rem; }
+.avatar-edit-btn {
+  position: absolute; bottom: 0; right: 0; width: 28px; height: 28px; background: white;
+  border: 1px solid var(--glass-border); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; cursor: pointer;
+}
+.patient-name-box { text-align: center; }
+.patient-name-box h2 { font-size: 1.25rem; font-weight: 800; }
+.patient-id-badge { display: inline-block; font-size: 0.75rem; font-family: var(--font-mono); color: var(--text-muted); background: rgba(241, 245, 249, 0.8); padding: 2px 8px; border-radius: 6px; margin-top: 4px; }
+
+.vitals-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+  background: rgba(255, 255, 255, 0.6); padding: 12px; border-radius: 16px; border: 1px solid rgba(255, 255, 255, 0.8);
+}
+.vital-item { display: flex; flex-direction: column; }
+.vital-label { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; font-weight: 600; }
+.vital-val { font-size: 0.88rem; font-weight: 700; margin-top: 2px; }
+
+.text-success { color: #059669; }
+.text-warning { color: #d97706; }
+.text-danger { color: #dc2626; }
+
+.clinical-meta-box {
+  background: rgba(248, 250, 252, 0.75); border-radius: 14px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; font-size: 0.78rem; border: 1px solid rgba(226, 232, 240, 0.7);
+}
+.meta-line { display: flex; justify-content: space-between; align-items: center; }
+.meta-k { color: var(--text-muted); }
+.meta-v { font-weight: 600; }
+
+.sidebar-nav { display: flex; flex-direction: column; gap: 8px; }
+.nav-btn {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px; border-radius: 14px;
+  border: 1px solid transparent; background: transparent; color: var(--text-muted); font-size: 0.88rem; font-weight: 600; cursor: pointer; text-align: left; transition: var(--transition-fast);
+}
+.nav-btn:hover { background: rgba(255, 255, 255, 0.8); color: var(--text-dark); }
+.nav-btn.active { background: white; color: var(--primary); border-color: rgba(37, 99, 235, 0.2); box-shadow: 0 4px 14px rgba(37, 99, 235, 0.08); }
+.nav-btn-icon { font-size: 1.1rem; }
+
+.session-progress-card {
+  margin-top: auto; background: rgba(239, 246, 255, 0.7); border: 1px solid rgba(191, 219, 254, 0.7); padding: 12px 14px; border-radius: 14px;
+}
+.progress-title-row { display: flex; justify-content: space-between; font-size: 0.75rem; font-weight: 700; color: #1e40af; margin-bottom: 8px; }
+.progress-bar-track { height: 8px; background: #dbeafe; border-radius: 999px; overflow: hidden; }
+.progress-bar-fill { height: 100%; background: linear-gradient(90deg, #2563eb, #06b6d4); border-radius: 999px; transition: width 0.4s ease; }
+
+.content-viewport { flex: 1; display: flex; flex-direction: column; overflow-y: auto; position: relative; }
+.view-section { display: none; animation: fadeInView 0.3s ease forwards; }
+.view-section.active { display: block; }
+@keyframes fadeInView { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+/* Hero Overview */
+.hero-card { padding: 36px 40px; display: flex; justify-content: space-between; align-items: center; gap: 32px; margin-bottom: 24px; }
+.hero-content { max-width: 620px; }
+.hero-badge-tag { display: inline-flex; align-items: center; font-size: 0.75rem; font-weight: 700; background: rgba(37, 99, 235, 0.1); color: #1d4ed8; padding: 4px 12px; border-radius: 999px; margin-bottom: 14px; }
+.hero-title { font-size: 2.2rem; font-weight: 800; line-height: 1.2; letter-spacing: -0.03em; }
+.hero-title span { background: linear-gradient(135deg, #2563eb, #06b6d4); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.hero-desc { font-size: 0.96rem; color: var(--text-muted); line-height: 1.6; margin-top: 14px; }
+.hero-stats-row { display: flex; gap: 24px; margin-top: 24px; }
+.hero-stat-number { font-size: 1.6rem; font-weight: 800; color: var(--text-dark); }
+.hero-stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; }
+.hero-brain-illustration {
+  width: 200px; height: 200px; background: radial-gradient(circle, #e0e7ff 0%, #ede9fe 60%, transparent 80%);
+  border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 5rem;
+}
+
+.dashboard-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.action-card { padding: 28px; display: flex; flex-direction: column; justify-content: space-between; gap: 20px; cursor: pointer; transition: var(--transition-fast); }
+.action-card:hover { transform: translateY(-4px); box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08); }
+.action-card-header { display: flex; align-items: center; gap: 14px; }
+.action-card-icon { width: 52px; height: 52px; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 1.6rem; }
+.icon-blue { background: #dbeafe; color: #1d4ed8; }
+.icon-purple { background: #f3e8ff; color: #7e22ce; }
+.icon-green { background: #d1fae5; color: #065f46; }
+.action-card h3 { font-size: 1.15rem; font-weight: 700; }
+.action-card p { font-size: 0.85rem; color: var(--text-muted); line-height: 1.5; }
+.card-cta-row { display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; font-weight: 700; color: var(--primary); }
+
+.btn-action-primary {
+  background: linear-gradient(135deg, #2563eb, #1d4ed8); color: white; border: none;
+  padding: 14px 28px; border-radius: 14px; font-size: 0.95rem; font-weight: 700; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 10px;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.28); transition: var(--transition-fast);
+}
+.btn-action-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 28px rgba(37, 99, 235, 0.38); }
+.btn-action-secondary {
+  background: white; color: var(--text-dark); border: 1px solid var(--glass-border);
+  padding: 12px 24px; border-radius: 14px; font-size: 0.9rem; font-weight: 600; cursor: pointer;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: var(--transition-fast);
+}
+
+/* ==========================================================================
+   3D Virtual Clinic Room Perspective (Matches Screenshots 16, 17, 18, 20)
+   ========================================================================== */
+.clinic-room-stage {
+  position: relative;
+  width: 100%;
+  min-height: 560px;
+  background: #cdd5df;
+  border-radius: 20px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 0 80px rgba(0, 0, 0, 0.25);
+  perspective: 900px;
+}
+
+/* Ceiling with recessed lights */
+.clinic-ceiling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(180deg, #7c8591 0%, #b8c1cc 100%);
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  border-bottom: 2px solid #5a6470;
+}
+
+.ceiling-light {
+  width: 50px;
+  height: 18px;
+  background: #ffffff;
+  border-radius: 3px;
+  box-shadow: 0 0 35px rgba(255, 255, 255, 0.95), 0 0 8px #ffffff;
+}
+
+/* Medical Blue Stripe on Clinic Walls */
+.clinic-wall-stripe {
+  position: absolute;
+  top: 150px;
+  left: 0;
+  width: 100%;
+  height: 48px;
+  background: #0284c7;
+  border-top: 2px solid #0369a1;
+  border-bottom: 2px solid #0369a1;
+  opacity: 0.92;
+}
+
+/* Perspective Tiled Floor */
+.clinic-floor {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  height: 240px;
+  background: linear-gradient(180deg, #cbd5e1 0%, #94a3b8 100%);
+  background-image: 
+    repeating-linear-gradient(0deg, transparent, transparent 38px, rgba(255, 255, 255, 0.4) 38px, rgba(255, 255, 255, 0.4) 40px),
+    repeating-linear-gradient(90deg, transparent, transparent 78px, rgba(255, 255, 255, 0.3) 78px, rgba(255, 255, 255, 0.3) 80px);
+  border-top: 3px solid #64748b;
+}
+
+/* Left Clinic Furniture: 4-Drawer Blue Filing Cabinet */
+.clinic-cabinet {
+  position: absolute;
+  left: 80px;
+  bottom: 120px;
+  width: 70px;
+  height: 130px;
+  background: #0284c7;
+  border-radius: 6px;
+  border: 2px solid #0369a1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-evenly;
+  padding: 4px;
+  box-shadow: 10px 10px 25px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+.cabinet-drawer {
+  height: 22px;
+  background: #bae6fd;
+  border-radius: 4px;
+  border: 1px solid #7dd3fc;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.drawer-handle {
+  width: 18px;
+  height: 4px;
+  background: #0369a1;
+  border-radius: 2px;
+}
+
+/* Examination Couch */
+.clinic-couch {
+  position: absolute;
+  left: -20px;
+  bottom: 60px;
+  width: 160px;
+  height: 65px;
+  background: #ffffff;
+  border-top: 14px solid #38bdf8;
+  border-radius: 8px;
+  box-shadow: 8px 12px 20px rgba(0, 0, 0, 0.18);
+  z-index: 2;
+}
+
+/* Right Clinic Furniture: Doctor Desk */
+.clinic-desk {
+  position: absolute;
+  right: 60px;
+  bottom: 90px;
+  width: 140px;
+  height: 90px;
+  background: #0284c7;
+  border-top: 14px solid #e2e8f0;
+  border-radius: 6px;
+  box-shadow: -10px 12px 25px rgba(0, 0, 0, 0.2);
+  z-index: 2;
+}
+
+/* Anatomical Eye Chart Wall Frame */
+.clinic-wall-frame {
+  position: absolute;
+  left: 20px;
+  top: 170px;
+  width: 50px;
+  height: 65px;
+  background: #ffffff;
+  border: 4px solid #0f172a;
+  box-shadow: 4px 4px 10px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.4rem;
+  z-index: 2;
+}
+
+/* Floating Test Board Container in Center of 3D Room */
+.clinic-center-board {
+  position: relative;
+  z-index: 10;
+  background: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.35);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+}
+
+/* Vertical Metric Sliders in Room */
+.clinic-room-slider {
+  position: absolute;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  padding: 10px 14px;
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.slider-distance { right: 80px; top: 120px; }
+.slider-size { right: 20px; top: 120px; }
+.slider-npc-dist { left: 240px; top: 140px; }
+.slider-npc-speed { left: 340px; top: 140px; }
+
+/* 0-9 Bottom Number Bar for Ishihara Screening */
+.ishihara-number-bar {
+  display: flex;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.9);
+  padding: 8px 14px;
+  border-radius: 14px;
+  border: 2px solid #38bdf8;
+  box-shadow: 0 8px 20px rgba(2, 132, 199, 0.18);
+  margin-top: 14px;
+}
+
+.num-tile-btn {
+  width: 44px;
+  height: 44px;
+  background: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: var(--transition-fast);
+}
+
+.num-tile-btn:hover {
+  background: #0284c7;
+  color: white;
+  transform: translateY(-2px);
+  border-color: #0284c7;
+}
+
+/* ==========================================================================
+   Realistic VR Touch Controllers & Dual Laser Beams Overlay
+   ========================================================================== */
+.vr-controllers-container {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 500;
+  overflow: hidden;
+}
+
+.vr-controller-wrap {
+  position: absolute;
+  bottom: -20px;
+  width: 180px;
+  height: 220px;
+  transition: transform 0.08s cubic-bezier(0.2, 0, 0.2, 1);
+  transform-origin: center bottom;
+}
+
+.left-controller {
+  left: 18%;
+  transform: rotate(12deg);
+}
+
+.right-controller {
+  right: 18%;
+  transform: rotate(-12deg);
+}
+
+/* Controller Ergonomic 3D Shell */
+.controller-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tracking-ring {
+  position: absolute;
+  top: 10px;
+  left: 30px;
+  width: 110px;
+  height: 75px;
+  border: 14px solid #e2e8f0;
+  border-radius: 50% / 40%;
+  transform: rotate(-10deg);
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.25), inset 0 2px 6px rgba(255, 255, 255, 0.8);
+}
+
+.faceplate {
+  position: absolute;
+  top: 45px;
+  left: 45px;
+  width: 80px;
+  height: 65px;
+  background: #334155;
+  border-radius: 20px;
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.6);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px;
+}
+
+.analog-thumbstick {
+  width: 32px;
+  height: 32px;
+  background: radial-gradient(circle, #64748b 0%, #1e293b 80%);
+  border-radius: 50%;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.4);
+  border: 2px solid #475569;
+  transition: transform 0.05s ease;
+}
+
+.controller-btn {
+  width: 18px;
+  height: 18px;
+  background: #475569;
+  color: #f8fafc;
+  border-radius: 50%;
+  font-size: 0.65rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+}
+
+.grip-handle {
+  position: absolute;
+  top: 90px;
+  left: 55px;
+  width: 60px;
+  height: 115px;
+  background: linear-gradient(180deg, #f1f5f9 0%, #cbd5e1 100%);
+  border-radius: 24px 24px 30px 30px;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.25), inset -2px 0 6px rgba(0, 0, 0, 0.15);
+}
+
+/* Laser Pointer Beam (Emitted from Controller Front) */
+.laser-beam-line {
+  position: fixed;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.95), rgba(56, 189, 248, 0.7) 70%, transparent 100%);
+  box-shadow: 0 0 12px var(--cyan-accent);
+  pointer-events: none;
+  transform-origin: left center;
+  z-index: 501;
+  opacity: 0.85;
+}
+
+.laser-reticle-dot {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 16px #38bdf8, 0 0 4px #ffffff;
+  border: 2px solid white;
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 502;
+  transition: transform 0.04s ease-out;
+}
+
+/* ==========================================================================
+   Dedicated Stereoscopic 3D Side-by-Side VR Mode
+   ========================================================================== */
+.vr-split-screen-container {
+  display: none;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000000;
+  z-index: 9999;
+}
+
+body.vr-mode-active .vr-split-screen-container {
+  display: flex;
+}
+
+body.vr-mode-active .top-nav,
+body.vr-mode-active .main-layout {
+  display: none !important;
+}
+
+.vr-eye {
+  flex: 1;
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at center, #0f172a 0%, #000000 80%);
+}
+
+.vr-lens-badge {
+  position: absolute;
+  top: 24px;
+  color: #38bdf8;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+}
+
+.vr-eye-content {
+  width: 90%;
+  height: 80%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform: scale(0.92);
+}
+
+.vr-split-divider {
+  width: 4px;
+  height: 100vh;
+  background: #1e293b;
+}
+
+.btn-exit-vr {
+  position: absolute;
+  bottom: 24px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(239, 68, 68, 0.9);
+  color: white;
+  border: none;
+  padding: 12px 28px;
+  border-radius: 999px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  cursor: pointer;
+  z-index: 10000;
+  box-shadow: 0 0 20px rgba(239, 68, 68, 0.5);
+}
+
+/* ==========================================================================
+   Amblyopia Setup Modal (Matches Amblyopia Main Menu.png)
+   ========================================================================== */
+.amblyopia-setup-card {
+  width: 100%;
+  max-width: 480px;
+  padding: 32px 36px;
+  background: rgba(255, 255, 255, 0.95) !important;
+  border-radius: 28px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  position: relative;
+}
+
+.menu-top-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.btn-back-circle {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #cbd5e1;
+  background: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.1rem;
+  cursor: pointer;
+}
+
+.company-logo-text {
+  font-weight: 800;
+  font-size: 0.9rem;
+  color: var(--text-dark);
+  letter-spacing: 0.05em;
+}
+
+.game-capsule-badge {
+  align-self: center;
+  border: 2px solid #0f172a;
+  border-radius: 12px;
+  padding: 4px 32px;
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.patient-rx-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.85rem;
+  color: var(--text-dark);
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 8px;
+}
+
+.setup-option-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.setup-option-group label {
+  font-size: 0.78rem;
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.pill-options-row {
+  display: flex;
+  gap: 8px;
+}
+
+.pill-opt-btn {
+  flex: 1;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: none;
+  background: #cbd5e1;
+  color: #334155;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.pill-opt-btn.active {
+  background: #06b6d4;
+  color: white;
+  box-shadow: 0 4px 12px rgba(6, 182, 212, 0.35);
+}
+
+.btn-coral-next {
+  background: #f87171;
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 800;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 6px 18px rgba(248, 113, 113, 0.35);
+  transition: var(--transition-fast);
+}
+
+.btn-coral-next:hover {
+  background: #ef4444;
+  transform: translateY(-2px);
+}
+
+/* ==========================================================================
+   Amblyopia Therapy Game In-Game HUD (Matches Amblyopia game screen.jpg)
+   ========================================================================== */
+.game-top-hud-capsule {
+  position: absolute;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #facc15;
+  border: 3px solid #eab308;
+  border-radius: 999px;
+  padding: 6px 28px;
+  display: flex;
+  align-items: center;
+  gap: 32px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+  z-index: 20;
+}
+
+.hud-timer {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.hud-pause-btn {
+  background: #0f172a;
+  color: white;
+  border: none;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.hud-eye-score {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Left Streak Modifier Card */
+.game-streak-card {
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  background: #fef08a;
+  border: 2px solid #facc15;
+  border-radius: 14px;
+  padding: 10px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.15);
+  z-index: 20;
+}
+
+.streak-badge {
+  background: #06b6d4;
+  color: white;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.streak-text-col {
+  display: flex;
+  flex-direction: column;
+}
+
+.streak-main-title {
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #0f172a;
+  letter-spacing: 0.02em;
+}
+
+.streak-progress-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.streak-track {
+  width: 90px;
+  height: 6px;
+  background: #e2e8f0;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.streak-fill {
+  width: 65%;
+  height: 100%;
+  background: #22c55e;
+  border-radius: 999px;
+}
+
+.streak-timer-text {
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: #0f172a;
+  font-family: var(--font-mono);
+}
+
+/* Rest of Common UI */
+.test-suite-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 18px; flex-wrap: wrap; gap: 12px; }
+.test-selector-tabs { display: flex; gap: 8px; background: rgba(241, 245, 249, 0.8); padding: 4px; border-radius: 14px; }
+.test-tab-btn {
+  background: transparent; border: none; padding: 8px 16px; font-size: 0.82rem; font-weight: 700;
+  color: var(--text-muted); border-radius: 10px; cursor: pointer; transition: var(--transition-fast);
+}
+.test-tab-btn.active { background: white; color: var(--primary); box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08); }
+
+.test-workbench { display: flex; gap: 20px; min-height: 500px; }
+.test-viewport-box { flex: 1; background: #94a3b8; border-radius: 20px; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; }
+.test-canvas { background: white; border-radius: 12px; box-shadow: 0 12px 32px rgba(0, 0, 0, 0.25); display: block; }
+.test-side-controls { width: 280px; display: flex; flex-direction: column; justify-content: space-between; padding: 20px; }
+.test-metrics-readout { display: flex; flex-direction: column; gap: 8px; text-align: right; }
+.metric-title { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; color: var(--text-muted); }
+.metric-highlight { font-size: 2.4rem; font-weight: 800; color: #06b6d4; line-height: 1; }
+.metric-unit { font-size: 0.88rem; font-weight: 700; }
+.metric-sub { font-size: 0.78rem; color: var(--text-muted); }
+.metric-status-callout { font-size: 0.85rem; font-weight: 700; color: #ca8a04; margin-top: 6px; }
+.btn-test-action-group { display: flex; flex-direction: column; gap: 8px; margin-top: 20px; }
+.btn-control { background: #f1f5f9; border: 1px solid #cbd5e1; color: var(--text-dark); padding: 10px 16px; border-radius: 10px; font-size: 0.88rem; font-weight: 700; cursor: pointer; }
+.btn-control:hover { background: #e2e8f0; }
+.btn-control.primary { background: #2563eb; color: white; border-color: #1d4ed8; }
+
+/* Worth 4-Dot Test */
+.worth-dots-container {
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px;
+  background: #09090b !important; padding: 40px; border-radius: 20px;
+}
+.worth-dots-grid {
+  display: grid; grid-template-areas: ". top ." "left . right" ". bottom .";
+  gap: 24px; width: 220px; height: 220px; align-items: center; justify-items: center;
+}
+.dot-top { grid-area: top; background: #ef4444; box-shadow: 0 0 24px #ef4444; }
+.dot-left { grid-area: left; background: #10b981; box-shadow: 0 0 24px #10b981; }
+.dot-right { grid-area: right; background: #10b981; box-shadow: 0 0 24px #10b981; }
+.dot-bottom { grid-area: bottom; background: #f8fafc; box-shadow: 0 0 24px #f8fafc; }
+.worth-aperture { width: 48px; height: 48px; border-radius: 50%; }
+
+.worth-options-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; width: 100%; max-width: 480px; margin-top: 24px; }
+.btn-worth-choice {
+  background: rgba(255, 255, 255, 0.12); border: 1px solid rgba(255, 255, 255, 0.2);
+  color: white; padding: 14px; border-radius: 12px; font-size: 0.88rem; font-weight: 600; cursor: pointer;
+}
+.btn-worth-choice:hover { background: rgba(255, 255, 255, 0.25); }
+
+/* Report */
+.report-container { max-width: 920px; margin: 0 auto; padding: 36px 40px; }
+.report-header-row { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 2px solid #e2e8f0; padding-bottom: 20px; margin-bottom: 24px; }
+.report-title-box h2 { font-size: 1.6rem; font-weight: 800; }
+.report-session-sub { font-size: 0.82rem; color: var(--text-muted); margin-top: 4px; }
+
+.classification-banner {
+  background: white; border-radius: 18px; padding: 20px 24px; display: flex; justify-content: space-between;
+  align-items: center; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.04); border: 1px solid #e2e8f0; margin-bottom: 24px;
+}
+.classification-pills-row { display: flex; gap: 8px; }
+.class-pill { padding: 8px 18px; border-radius: 999px; font-size: 0.82rem; font-weight: 800; opacity: 0.35; }
+.pill-normal { background: var(--status-normal-bg); color: #065f46; border: 2px solid #10b981; }
+.pill-monitor { background: var(--status-monitor-bg); color: #92400e; border: 2px solid #f59e0b; }
+.pill-refer { background: var(--status-refer-bg); color: #991b1b; border: 2px solid #ef4444; }
+.pill-urgent { background: var(--status-urgent-bg); color: #7f1d1d; border: 2px solid #991b1b; }
+.class-pill.selected { opacity: 1; transform: scale(1.05); box-shadow: 0 4px 14px rgba(239, 68, 68, 0.35); }
+.confidence-readout { text-align: right; }
+.conf-label { font-size: 0.72rem; color: var(--text-muted); text-transform: uppercase; font-weight: 700; }
+.conf-val { font-size: 1.4rem; font-weight: 800; color: #1d4ed8; }
+
+.findings-card { background: rgba(254, 242, 242, 0.85); border: 1px solid rgba(252, 165, 165, 0.8); border-radius: 16px; padding: 20px; margin-bottom: 20px; }
+.findings-card.healthy-mode { background: rgba(236, 253, 245, 0.85); border-color: rgba(110, 231, 183, 0.8); }
+.findings-label { font-size: 0.78rem; font-weight: 800; color: #991b1b; margin-bottom: 6px; }
+.findings-text { font-size: 0.95rem; color: #7f1d1d; line-height: 1.5; font-weight: 500; }
+
+.parent-card { background: rgba(239, 246, 255, 0.85); border: 1px solid rgba(191, 219, 254, 0.8); border-radius: 16px; padding: 20px; margin-bottom: 24px; }
+.parent-label { font-size: 0.78rem; font-weight: 800; color: #1e40af; margin-bottom: 6px; }
+.parent-text { font-size: 0.95rem; color: #1e3a8a; line-height: 1.5; }
+
+.report-metrics-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+.report-metric-box { background: white; padding: 14px 16px; border-radius: 14px; border: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; }
+.metric-box-k { font-size: 0.82rem; color: var(--text-muted); font-weight: 600; }
+.metric-box-v { font-size: 0.92rem; font-weight: 700; }
+
+.report-footer-actions { display: flex; justify-content: space-between; align-items: center; padding-top: 18px; border-top: 1px solid #e2e8f0; }
+.clinical-disclaimer { font-size: 0.72rem; color: var(--text-muted); font-style: italic; max-width: 450px; }
+
+/* Game Canvas Box */
+.game-stage-wrapper { display: flex; flex-direction: column; height: 100%; gap: 14px; position: relative; }
+.game-top-bar { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px; }
+.game-canvas-box {
+  flex: 1; background: #cf599a; border-radius: 20px; overflow: hidden; position: relative; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.2);
+}
+#therapy-canvas { width: 100%; height: 100%; display: block; }
+.game-overlay {
+  position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+  background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(8px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; color: white; gap: 16px; z-index: 30;
+}
+.game-overlay.hidden { display: none; }
+
+/* Login Modal */
+.modal-backdrop {
+  position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+  background: rgba(15, 23, 42, 0.45); backdrop-filter: blur(12px);
+  z-index: 1000; display: none; align-items: center; justify-content: center;
+}
+.modal-backdrop.active { display: flex; }
+.modal-card { width: 100%; max-width: 440px; padding: 36px; position: relative; }
+.modal-close-btn { position: absolute; top: 20px; right: 20px; background: transparent; border: none; font-size: 1.1rem; color: var(--text-muted); cursor: pointer; }
+.login-header { text-align: center; margin-bottom: 24px; }
+.login-badge-icon { font-size: 2.2rem; margin-bottom: 8px; }
+.login-subtitle { font-size: 0.85rem; color: var(--text-muted); margin-top: 4px; }
+.input-group { margin-bottom: 16px; }
+.input-group label { display: block; font-size: 0.8rem; font-weight: 600; margin-bottom: 6px; }
+.input-wrapper { position: relative; display: flex; align-items: center; }
+.input-icon { position: absolute; left: 14px; font-size: 0.95rem; }
+.input-wrapper input {
+  width: 100%; padding: 12px 14px 12px 42px; border-radius: 12px;
+  border: 1px solid #cbd5e1; font-family: inherit; font-size: 0.9rem; background: white;
+}
+.btn-toggle-eye { position: absolute; right: 14px; background: transparent; border: none; cursor: pointer; }
+.login-options-row { display: flex; justify-content: space-between; align-items: center; font-size: 0.8rem; margin-bottom: 20px; }
+.remember-me { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+.link-forgot { color: var(--primary); text-decoration: none; font-weight: 600; }
+.w-full { width: 100%; }
+.login-divider { display: flex; align-items: center; text-align: center; margin: 16px 0; color: var(--text-dim); font-size: 0.75rem; font-weight: 700; }
+.login-divider::before, .login-divider::after { content: ''; flex: 1; border-bottom: 1px solid #e2e8f0; }
+.login-divider span { padding: 0 10px; }
+
+@media print {
+  .top-nav, .patient-sidebar, .report-footer-actions, .judge-demo-pill, .btn-icon-pill, .vr-controllers-container { display: none !important; }
+  .main-layout { display: block; height: auto; padding: 0; }
+  .glass-panel { border: none; box-shadow: none; background: white; }
+  .report-container { max-width: 100%; padding: 0; }
+}
+
+
+/* ==========================================================================
+   ENHANCED VR CLINIC, SCREENSHOT ENGINE & JOYSTICK CONTROLS
+   Recreated with precision for Hackathon Demo & Medical Standards
+   ========================================================================== */
+
+/* Top VR Room Button */
+.btn-vr-room {
+  background: rgba(56, 189, 248, 0.15) !important;
+  border: 1px solid #38bdf8 !important;
+  color: #0284c7 !important;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+.btn-vr-room:hover {
+  background: rgba(56, 189, 248, 0.28) !important;
+  box-shadow: 0 0 16px rgba(56, 189, 248, 0.4);
+  transform: translateY(-1px);
+}
+
+/* Screenshot Preview Modal */
+.screenshot-modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  padding: 24px;
+  width: 90%;
+  max-width: 680px;
+  box-shadow: 0 25px 50px -12px rgba(15, 23, 42, 0.35);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  animation: scaleUp 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.screenshot-modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 12px;
+}
+.screenshot-preview-box {
+  width: 100%;
+  max-height: 380px;
+  border-radius: 14px;
+  overflow: hidden;
+  border: 2px solid #cbd5e1;
+  background: #0f172a;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+.screenshot-preview-box img {
+  width: 100%;
+  height: auto;
+  max-height: 380px;
+  object-fit: contain;
+  display: block;
+}
+.screenshot-meta-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8fafc;
+  padding: 12px 18px;
+  border-radius: 12px;
+  font-size: 0.88rem;
+  color: #475569;
+  border: 1px solid #e2e8f0;
+}
+.screenshot-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+/* Game Stage Tools & Screenshot Button (Matches Amblyopia game screen.jpg) */
+.game-top-tools-row {
+  position: absolute;
+  top: 14px;
+  right: 18px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  z-index: 40;
+}
+.btn-hud-tool {
+  background: rgba(15, 23, 42, 0.8);
+  backdrop-filter: blur(8px);
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  color: #f8fafc;
+  padding: 8px 16px;
+  border-radius: 30px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.25);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.btn-hud-tool:hover {
+  background: #06b6d4;
+  border-color: #38bdf8;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.6);
+  transform: translateY(-2px);
+}
+.btn-hud-camera {
+  background: linear-gradient(135deg, #f59e0b 0%, #ea580c 100%) !important;
+  border-color: #fde047 !important;
+  color: #ffffff !important;
+}
+.btn-hud-camera:hover {
+  box-shadow: 0 0 20px rgba(245, 158, 11, 0.7) !important;
+}
+
+/* Authentic On-Screen 360° Analog Joystick Widget */
+.game-joystick-pad {
+  position: absolute;
+  bottom: 24px;
+  left: 28px;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(15, 23, 42, 0.8) 0%, rgba(30, 41, 59, 0.9) 100%);
+  border: 3px solid rgba(6, 182, 212, 0.65);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.45), inset 0 0 20px rgba(6, 182, 212, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  touch-action: none;
+  user-select: none;
+  z-index: 50;
+  backdrop-filter: blur(6px);
+}
+.joystick-compass-mark {
+  position: absolute;
+  color: rgba(6, 182, 212, 0.75);
+  font-size: 0.65rem;
+  font-weight: 800;
+  font-family: var(--font-mono);
+  pointer-events: none;
+}
+.mark-n { top: 4px; left: 50%; transform: translateX(-50%); }
+.mark-s { bottom: 4px; left: 50%; transform: translateX(-50%); }
+.mark-w { left: 6px; top: 50%; transform: translateY(-50%); }
+.mark-e { right: 6px; top: 50%; transform: translateY(-50%); }
+
+.joystick-crosshair-h, .joystick-crosshair-v {
+  position: absolute;
+  background: rgba(6, 182, 212, 0.25);
+  pointer-events: none;
+}
+.joystick-crosshair-h { width: 75%; height: 1px; }
+.joystick-crosshair-v { height: 75%; width: 1px; }
+
+.joystick-knob-stick {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 35%, #64748b 0%, #1e293b 65%, #0f172a 100%);
+  border: 2.5px solid #38bdf8;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.6), inset 0 2px 6px rgba(255, 255, 255, 0.35);
+  cursor: grab;
+  transition: transform 0.05s ease-out;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+}
+.joystick-knob-stick:active {
+  cursor: grabbing;
+  border-color: #06b6d4;
+  box-shadow: 0 0 18px #06b6d4, inset 0 1px 4px rgba(255, 255, 255, 0.5);
+}
+.joystick-knob-inner-dimple {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #0f172a 0%, #334155 100%);
+  border: 1.5px solid rgba(56, 189, 248, 0.5);
+  box-shadow: inset 0 3px 6px rgba(0, 0, 0, 0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.joystick-knob-inner-dimple::after {
+  content: '';
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 6px #38bdf8;
+}
+
+/* Ishihara 12 Plate Round Badge & Styling (Matches Color sensitivity.jpg) */
+.ishihara-round-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dbeafe;
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+/* ==========================================================================
+   3D VIRTUAL REALITY CLINICAL SUITE
+   Recreating Screenshot 2026-09-13 222434.jpg with 100% Visual Fidelity
+   ========================================================================== */
+.vr-clinic-viewport {
+  width: 100%;
+  height: calc(100vh - 120px);
+  min-height: 620px;
+  position: relative;
+  overflow: hidden;
+  perspective: 1200px;
+  background: radial-gradient(ellipse at 50% 30%, #e0f2fe 0%, #cbd5e1 50%, #94a3b8 100%);
+  border-radius: var(--radius-xl);
+  box-shadow: inset 0 0 60px rgba(0, 0, 0, 0.15);
+  user-select: none;
+}
+
+.vr-room-3d-stage {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  transform-style: preserve-3d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.08s cubic-bezier(0.1, 0, 0.1, 1);
+}
+
+/* Virtual Clinical Ceiling Lights & Wall Band */
+.vr-virtual-room-env {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transform-style: preserve-3d;
+}
+.vr-env-ceiling {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 80px;
+  display: flex;
+  justify-content: space-around;
+  padding-top: 15px;
+}
+.vr-env-light {
+  width: 44px;
+  height: 14px;
+  background: #ffffff;
+  border-radius: 3px;
+  box-shadow: 0 0 24px rgba(255, 255, 255, 0.9), 0 8px 30px rgba(255, 255, 255, 0.6);
+}
+.vr-env-wall-stripe {
+  position: absolute;
+  top: 26%;
+  left: 0;
+  width: 100%;
+  height: 64px;
+  background: #0ea5e9;
+  opacity: 0.85;
+  box-shadow: 0 4px 20px rgba(14, 165, 233, 0.35);
+}
+
+/* Top Floating VR Controls */
+.vr-top-toolbar {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(15, 23, 42, 0.88);
+  backdrop-filter: blur(14px);
+  padding: 8px 18px;
+  border-radius: 40px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  z-index: 100;
+}
+.vr-toolbar-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  color: #f8fafc;
+  padding: 7px 16px;
+  border-radius: 20px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vr-toolbar-btn:hover, .vr-toolbar-btn.active {
+  background: #06b6d4;
+  border-color: #38bdf8;
+  color: #ffffff;
+  box-shadow: 0 0 16px rgba(6, 182, 212, 0.7);
+  transform: translateY(-1px);
+}
+
+/* 3D Floating Curved UI Panels */
+.vr-panels-container {
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  gap: 24px;
+  transform-style: preserve-3d;
+  transform: translateZ(-50px);
+  padding-bottom: 70px;
+  width: 95%;
+  max-width: 1060px;
+}
+
+.vr-curved-card {
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(24px);
+  border: 1.5px solid rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.16), 0 0 0 1px rgba(255, 255, 255, 0.6);
+  padding: 22px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  position: relative;
+}
+
+/* Left Panel ("Hello, Vision") */
+.vr-card-left {
+  width: 320px;
+  transform: rotateY(12deg) translateZ(-15px);
+}
+.vr-card-center {
+  width: 620px;
+  transform: translateZ(0px);
+}
+
+.vr-card-laser-hover {
+  box-shadow: 0 0 30px rgba(6, 182, 212, 0.7), 0 20px 50px rgba(15, 23, 42, 0.25) !important;
+  border-color: #06b6d4 !important;
+}
+
+/* Left Card Elements */
+.vr-profile-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.vr-profile-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+.vr-btn-circle-action {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.vr-btn-power { background: #fee2e2; color: #dc2626; }
+.vr-btn-edit { background: #e0f2fe; color: #0284c7; }
+
+.vr-avatar-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 16px;
+}
+.vr-avatar-img {
+  width: 68px;
+  height: 68px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #fef08a 0%, #fed7aa 100%);
+  border: 3px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2.2rem;
+}
+
+.vr-vitals-table {
+  width: 100%;
+  font-size: 0.8rem;
+  margin-bottom: 14px;
+}
+.vr-vitals-table tr {
+  line-height: 1.6;
+}
+.vr-vitals-table td:first-child {
+  color: #64748b;
+  font-weight: 600;
+  width: 45%;
+}
+.vr-vitals-table td:last-child {
+  color: #0f172a;
+  font-weight: 800;
+  font-family: var(--font-mono);
+}
+
+.vr-status-progress-box {
+  background: #f8fafc;
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  border: 1px solid #e2e8f0;
+}
+.vr-status-label-row {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.78rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: #334155;
+}
+.vr-status-bar-track {
+  width: 100%;
+  height: 8px;
+  background: #e2e8f0;
+  border-radius: 4px;
+  overflow: hidden;
+}
+.vr-status-bar-fill {
+  height: 100%;
+  width: 82%;
+  background: linear-gradient(90deg, #10b981 0%, #06b6d4 100%);
+  border-radius: 4px;
+}
+
+.vr-section-subtitle {
+  font-size: 0.8rem;
+  font-weight: 800;
+  color: #1e293b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 12px 0 6px 0;
+  border-bottom: 1px solid #f1f5f9;
+  padding-bottom: 4px;
+}
+
+.vr-connected-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  background: #ecfdf5;
+  color: #059669;
+  border: 1px solid #a7f3d0;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  margin-top: 14px;
+}
+
+/* Center Card Elements (Core Clinical) */
+.vr-center-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+.vr-core-pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.vr-logo-badge {
+  background: #f1f5f9;
+  border: 1px solid #cbd5e1;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 800;
+  color: #334155;
+}
+.vr-core-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: #0f172a;
+}
+.btn-vr-golive {
+  background: #0ea5e9;
+  color: #ffffff;
+  border: none;
+  padding: 6px 18px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(14, 165, 233, 0.4);
+  transition: all 0.2s ease;
+}
+.btn-vr-golive:hover {
+  background: #0284c7;
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(14, 165, 233, 0.6);
+}
+
+.vr-hero-text-block h2 {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0 0 4px 0;
+}
+.vr-hero-text-block p {
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #475569;
+  margin: 0 0 16px 0;
+}
+
+/* Center Art: Brain-Eye Tree with Lotus & Celestial Symbols */
+.vr-artwork-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 12px 0 16px 0;
+}
+.vr-tree-svg {
+  width: 100%;
+  max-width: 380px;
+  height: 150px;
+  filter: drop-shadow(0 8px 16px rgba(14, 165, 233, 0.15));
+}
+
+/* Guided Exercises & Smart Diagnostics Cards */
+.vr-modules-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+.vr-module-box {
+  background: #f8fafc;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.vr-module-box:hover {
+  background: #ffffff;
+  border-color: #06b6d4;
+  box-shadow: 0 6px 20px rgba(6, 182, 212, 0.2);
+  transform: translateY(-2px);
+}
+.vr-module-icon {
+  font-size: 1.6rem;
+}
+.vr-module-text h4 {
+  font-size: 0.9rem;
+  font-weight: 800;
+  color: #0f172a;
+  margin: 0;
+}
+.vr-module-text span {
+  font-size: 0.72rem;
+  color: #64748b;
+}
+
+/* Core Clinical Status Box */
+.vr-clinical-status-box {
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 10px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.76rem;
+  color: #475569;
+}
+.vr-status-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+/* Floating Quick Launch Test Ribbon inside VR */
+.vr-floating-test-dock {
+  position: absolute;
+  bottom: 85px;
+  left: 50%;
+  transform: translateX(-50%) translateZ(20px);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 23, 42, 0.85);
+  backdrop-filter: blur(14px);
+  padding: 8px 16px;
+  border-radius: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+  z-index: 60;
+}
+.vr-test-chip {
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: #f8fafc;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  white-space: nowrap;
+}
+.vr-test-chip:hover {
+  background: #06b6d4;
+  border-color: #38bdf8;
+  color: #ffffff;
+  transform: translateY(-2px);
+  box-shadow: 0 0 14px rgba(6, 182, 212, 0.6);
+}
+
+/* Bottom VR Navigation Dock */
+.vr-bottom-dock {
+  position: absolute;
+  bottom: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  padding: 8px 24px;
+  border-radius: 40px;
+  box-shadow: 0 8px 30px rgba(15, 23, 42, 0.15);
+  border: 1px solid #ffffff;
+  z-index: 70;
+}
+.vr-dock-btn {
+  background: transparent;
+  border: none;
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  transition: all 0.2s ease;
+}
+.vr-dock-btn.active, .vr-dock-btn:hover {
+  background: #e0f2fe;
+  color: #0284c7;
+}
+
+/* Realistic Dark Charcoal VR Touch Controllers (Matches Screenshot 2026-09-13 222434.jpg) */
+.vr-controller-wrap {
+  position: absolute;
+  bottom: -30px;
+  width: 190px;
+  height: 240px;
+  transition: transform 0.08s cubic-bezier(0.2, 0, 0.2, 1);
+  transform-origin: center bottom;
+  pointer-events: none;
+}
+.left-controller {
+  left: 20%;
+  transform: rotate(14deg);
+}
+.right-controller {
+  right: 20%;
+  transform: rotate(-14deg);
+}
+
+.controller-body {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.tracking-ring {
+  position: absolute;
+  top: 6px;
+  left: 26px;
+  width: 124px;
+  height: 84px;
+  border: 15px solid #1e293b;
+  border-radius: 50% / 40%;
+  transform: rotate(-12deg);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45), inset 0 2px 8px rgba(255, 255, 255, 0.25);
+  background: transparent;
+}
+.tracking-ring::after {
+  content: '';
+  position: absolute;
+  top: -8px;
+  right: 18px;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 8px #38bdf8;
+}
+
+.faceplate {
+  position: absolute;
+  top: 48px;
+  left: 45px;
+  width: 86px;
+  height: 72px;
+  background: #0f172a;
+  border-radius: 22px;
+  box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.8), 0 4px 10px rgba(0, 0, 0, 0.3);
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Realistic Analog Thumbstick with Knurled Rim & Center Dimple */
+.analog-thumbstick {
+  width: 36px;
+  height: 36px;
+  background: radial-gradient(circle at 35% 35%, #475569 0%, #1e293b 65%, #0f172a 100%);
+  border-radius: 50%;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.6), inset 0 1px 3px rgba(255, 255, 255, 0.3);
+  border: 2px solid #334155;
+  transition: transform 0.05s ease;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.analog-thumbstick::before {
+  content: '';
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  border: 1px dashed rgba(56, 189, 248, 0.45);
+  position: absolute;
+}
+.analog-thumbstick::after {
+  content: '';
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #0f172a;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.9);
+}
+
+.controller-btn {
+  width: 18px;
+  height: 18px;
+  background: #334155;
+  color: #f8fafc;
+  border-radius: 50%;
+  font-size: 0.62rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.grip-handle {
+  position: absolute;
+  top: 98px;
+  left: 55px;
+  width: 66px;
+  height: 125px;
+  background: linear-gradient(180deg, #1e293b 0%, #0f172a 100%);
+  border-radius: 26px 26px 32px 32px;
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5), inset -2px 0 8px rgba(0, 0, 0, 0.4);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+.grip-handle::after {
+  content: '';
+  position: absolute;
+  top: 20px;
+  right: -5px;
+  width: 8px;
+  height: 40px;
+  border-radius: 4px;
+  background: #334155;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+}
+
+/* Radiant Cyan and Sky-Blue Pointer Lasers */
+.laser-beam-line {
+  position: fixed;
+  height: 3px;
+  background: linear-gradient(90deg, rgba(6, 182, 212, 0.95), rgba(56, 189, 248, 0.7) 60%, transparent 100%);
+  box-shadow: 0 0 14px #06b6d4, 0 0 4px #ffffff;
+  pointer-events: none;
+  transform-origin: left center;
+  z-index: 501;
+  opacity: 0.88;
+}
+.laser-reticle-dot {
+  position: fixed;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: #38bdf8;
+  box-shadow: 0 0 18px #38bdf8, 0 0 4px #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+  z-index: 502;
+  opacity: 0.9;
+  transition: transform 0.05s ease;
+}
